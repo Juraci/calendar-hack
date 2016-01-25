@@ -16,27 +16,30 @@ function clickOnCountry(country) {
 }
 
 function findRoomInOffice(query) {
-    var offices = [];
-    var roomFound = false;
+    var tries = 0;
+    var maxTries = 20;
 
     var id = setInterval(function(){
-        if (offices.length === 0) {
-            console.log('looking for offices');
-            offices = document.querySelectorAll('div.ci[style*="background-image"][style*="res_a.gif"]');
-            if (offices.length > 0) {
-                console.log('Offices found');
-                for(var i = 0; i < offices.length; i++) {
-                    console.log('Checking office: ' + offices[i].textContent);
-                    if(offices[i].textContent.includes(query)) {
-                        console.log('Room found ' + query);
-                        offices[i].querySelector('.conf-action').click();
-                        clearInterval(id);
-                    }
+        console.log('looking for offices');
+        var offices = document.querySelectorAll('div.ci[style*="background-image"][style*="res_a.gif"]');
+        if (offices.length > 0) {
+            console.log('Offices found');
+            for(var i = 0; i < offices.length; i++) {
+                console.log('Checking office: ' + offices[i].textContent);
+                if(offices[i].textContent.includes(query)) {
+                    console.log('Room found ' + query);
+                    offices[i].querySelector('.conf-action').click();
+                    clearInterval(id);
                 }
             }
         }
-        console.log('Interval check still running: ' + id);
-    }, 1000);
+
+        tries++;
+        if (tries >= maxTries) {
+            console.log('Could not find the office in %s tries, aborting.', tries);
+            clearInterval(id);
+        }
+    }, 800);
 }
 
 clickOnRooms();
