@@ -1,25 +1,14 @@
-var startTime = document.querySelector('input[id*="st"][class*="dr-time"]');
-var endTime = document.querySelector('input[id*="et"][class*="dr-time"]');
-
-function simulateClick(element) {
-    var options = { bubbles: true, cancelable: true, view: window  };
-    var mouseUpEvent = new MouseEvent('mousedown',  options);
-    var mouseDownEvent = new MouseEvent('mouseup', options);
-
-    element.dispatchEvent(mouseDownEvent);
-    element.dispatchEvent(mouseUpEvent);
-    element.dispatchEvent(mouseDownEvent);
+function clickOnRooms() {
+    var rooms = document.querySelector('#ui-ltsr-tab-1');
+    rooms.click();
 }
-
-var rooms = document.querySelector('#ui-ltsr-tab-1');
-rooms.click();
 
 function clickOnCountry(country) {
     var elements = document.querySelectorAll('div.ch');
     for(var i =  0; i < elements.length; i++) {
         if (elements[i].textContent.includes(country)) {
             elements[i].click();
-            return 'ok';
+            return 'Country found: ' + country;
         }
 
     }
@@ -27,8 +16,8 @@ function clickOnCountry(country) {
 }
 
 function findRoomInOffice(query) {
-
     var offices = [];
+    var roomFound = false;
 
     var id = setInterval(function(){
         if (offices.length === 0) {
@@ -37,18 +26,19 @@ function findRoomInOffice(query) {
             if (offices.length > 0) {
                 console.log('Offices found');
                 for(var i = 0; i < offices.length; i++) {
+                    console.log('Checking office: ' + offices[i].textContent);
                     if(offices[i].textContent.includes(query)) {
-                        console.log('Query found ' + query);
+                        console.log('Room found ' + query);
                         offices[i].querySelector('.conf-action').click();
+                        clearInterval(id);
                     }
                 }
             }
-
-        } else {
-            console.log('clear the intervalcheck');
-
         }
-
+        console.log('Interval check still running: ' + id);
     }, 1000);
-
 }
+
+clickOnRooms();
+console.log(clickOnCountry('Brazil'));
+findRoomInOffice('POA');
