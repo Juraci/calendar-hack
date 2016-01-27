@@ -38,8 +38,12 @@ function clickOnCountry(country) {
     var elements = document.querySelectorAll('div.ch');
     for(var i =  0; i < elements.length; i++) {
         if (elements[i].textContent.includes(country)) {
-            elements[i].click();
-            return 'Country found: ' + country;
+            if (elements[i].parentElement.querySelector('div[class*="ch-zippy-exp"]') === null ) {
+                elements[i].click();
+                return 'Country found: ' + country;
+            } else {
+                return 'Country already expanded: ' + country;
+            }
         }
 
     }
@@ -48,7 +52,7 @@ function clickOnCountry(country) {
 
 function findRoomInOffice(query) {
     var tries = 0;
-    var maxTries = 20;
+    var maxTries = 10;
 
     var id = setInterval(function(){
         console.log('looking for offices');
@@ -67,7 +71,7 @@ function findRoomInOffice(query) {
 
         tries++;
         if (tries >= maxTries) {
-            console.log('Could not find the office in %s tries, aborting.', tries);
+            console.log('Could not find a room in the office in %s tries, aborting.', tries);
             clearInterval(id);
         }
     }, 800);
