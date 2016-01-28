@@ -1,17 +1,25 @@
 var HIGHLIGHT = (function(){
-  var boxShadow = "0 0 15px rgba(81, 250, 200, 1)";
-  var border = "1px solid rgba(81, 250, 200, 1)";
+    var boxShadow = "0 0 15px rgba(81, 250, 200, 1)";
+    var border = "1px solid rgba(81, 250, 200, 1)";
 
-  return {
-    glow: function(element) {
-      element.style.boxShadow = boxShadow;
-      element.style.border = border;
-    }
-  };
+    return {
+        glow: function(element) {
+            var originalBoxShadow = element.style.boxShadow;
+            var originalBorder = element.style.border;
+            setInterval(function(){
+                element.style.boxShadow = boxShadow;
+                element.style.border = border;
+                setTimeout(function() {
+                    element.style.boxShadow = originalBoxShadow;
+                    element.style.border = originalBorder;
+                }, 1000);
+            }, 2000);
+        }
+    };
 })();
 
 var MOUSE = (function() {
-    var options = { bubbles: true, cancelable: true, view: window   };
+    var options = { bubbles: true, cancelable: true, view: window };
     var mouseUpEvent = new MouseEvent('mousedown',  options);
     var mouseDownEvent = new MouseEvent('mouseup', options);
 
@@ -99,6 +107,8 @@ function findRoomInOffice(query) {
 
 var startTime = document.querySelector('input[id*="st"][class*="dr-time"]');
 var endTime = document.querySelector('input[id*="et"][class*="dr-time"]');
+HIGHLIGHT.glow(startTime);
+HIGHLIGHT.glow(endTime);
 console.log(selectTime('16:30', startTime));
 console.log(selectTime('17:30', endTime));
 clickOnRooms();
