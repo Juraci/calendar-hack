@@ -1,12 +1,32 @@
-function simulateClick(element) {
+var HIGHLIGHT = (function(){
+  var boxShadow = "0 0 15px rgba(81, 250, 200, 1)";
+  var border = "1px solid rgba(81, 250, 200, 1)";
+
+  return {
+    glow: function(element) {
+      element.style.boxShadow = boxShadow;
+      element.style.border = border;
+    }
+  };
+})();
+
+var MOUSE = (function() {
     var options = { bubbles: true, cancelable: true, view: window   };
     var mouseUpEvent = new MouseEvent('mousedown',  options);
     var mouseDownEvent = new MouseEvent('mouseup', options);
 
-    element.dispatchEvent(mouseDownEvent);
-    element.dispatchEvent(mouseUpEvent);
-    element.dispatchEvent(mouseDownEvent);
-}
+    return {
+        click: function(element, options) {
+            options = typeof options !== 'undefined' ? options: {};
+            element.dispatchEvent(mouseDownEvent);
+            element.dispatchEvent(mouseUpEvent);
+            if ('dropdown' in options && options.dropdown === true) {
+                element.dispatchEvent(mouseDownEvent);
+            }
+        }
+    };
+})();
+
 
 function sanitizeTime(str) {
     return str.replace(/ \([\d+]*\,*[\d+]* [a-z]+\)/, '');
@@ -14,14 +34,14 @@ function sanitizeTime(str) {
 
 function selectTime(time, element) {
 
-    simulateClick(element);
+    MOUSE.click(element);
     var hours = document.querySelectorAll('div.goog-control');
     var sanitizedTime = '';
 
     for(var i = 0; i < hours.length; i++) {
         sanitizedTime = sanitizeTime(hours[i].textContent);
         if (sanitizedTime.includes(time)) {
-            simulateClick(hours[i]);
+            MOUSE.click(hours[i], {dropdown: true});
             return 'Hour selected: ' + sanitizedTime;
         }
     }
