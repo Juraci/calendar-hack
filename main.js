@@ -40,12 +40,11 @@ function sanitizeTime(str) {
 }
 
 function selectTime(time, element) {
-
     MOUSE.click(element);
     var hours = document.querySelectorAll('div.goog-control');
     var sanitizedTime = '';
 
-    for(var i = 0; i < hours.length; i++) {
+    for(var i = 0, hoursLength = hours.length; i < hoursLength; i++) {
         sanitizedTime = sanitizeTime(hours[i].textContent);
         if (sanitizedTime.includes(time)) {
             MOUSE.click(hours[i], {dropdown: true});
@@ -63,7 +62,8 @@ function clickOnRooms() {
 
 function clickOnCountry(country) {
     var elements = document.querySelectorAll('div.ch');
-    for(var i =  0; i < elements.length; i++) {
+
+    for(var i =  0, elementsLength = elements.length; i < elementsLength; i++) {
         if (elements[i].textContent.includes(country)) {
             if (elements[i].parentElement.querySelector('div[class*="ch-zippy-exp"]') === null ) {
                 elements[i].click();
@@ -84,15 +84,14 @@ function findRoomInOffice(query) {
     var id = setInterval(function(){
         console.log('looking for offices');
         var offices = document.querySelectorAll('div.ci[style*="background-image"][style*="res_a.gif"]');
-        if (offices.length > 0) {
-            console.log('Offices found');
-            for(var i = 0; i < offices.length; i++) {
-                console.log('Checking office: ' + offices[i].textContent);
-                if(offices[i].textContent.includes(query)) {
-                    console.log('Room found ' + query);
-                    offices[i].querySelector('.conf-action').click();
-                    clearInterval(id);
-                }
+
+        for(var i = 0, officesLength = offices.length; i < officesLength; i++) {
+            console.log('Checking office: ' + offices[i].textContent);
+            if(offices[i].textContent.includes(query)) {
+                console.log('Room found ' + query);
+                offices[i].querySelector('.conf-action').click();
+                clearInterval(id);
+                break;
             }
         }
 
