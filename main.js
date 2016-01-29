@@ -35,7 +35,6 @@ var MOUSE = (function() {
     };
 })();
 
-
 function sanitizeTime(str) {
     return str.replace(/ \([\d+]*\,*[\d+]* [a-z]+\)/, '');
 }
