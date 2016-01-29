@@ -35,30 +35,67 @@ var MOUSE = (function() {
     };
 })();
 
-function sanitizeTime(str) {
-    return str.replace(/ \([\d+]*\,*[\d+]* [a-z]+\)/, '');
-}
+var CALENDAR = (function(mouse) {
+    var startTimeSelector = 'input[id*="st"][class*="dr-time"]';
+    var endTimeSelector = 'input[id*="et"][class*="dr-time"]';
+    var roomsTabSelector = '#ui-ltsr-tab-1';
+    var hoursSelector = 'div.goog-control';
 
-function selectTime(time, element) {
-    MOUSE.click(element);
-    var hours = document.querySelectorAll('div.goog-control');
-    var sanitizedTime = '';
+    var startTimeElement = function() {
+        return document.querySelector(startTimeSelector);
+    };
 
-    for(var i = 0, hoursLength = hours.length; i < hoursLength; i++) {
-        sanitizedTime = sanitizeTime(hours[i].textContent);
-        if (sanitizedTime.includes(time)) {
-            MOUSE.click(hours[i], {dropdown: true});
-            return 'Hour selected: ' + sanitizedTime;
+    var endTimeElement = function() {
+        return document.querySelector(endTimeSelector);
+    };
+
+    var roomsTabElement = function() {
+        return document.querySelector(roomsTabSelector);
+    };
+
+    var hourElements = function() {
+        return document.querySelectorAll(hoursSelector);
+    };
+
+    var sanitizeTime = function(str) {
+        return str.replace(/ \([\d+]*\,*[\d+]* [a-z]+\)/, '');
+    };
+
+    var selectTimeOnElement = function(time, element) {
+            mouse.click(element);
+            var hours = hourElements();
+            var sanitizedTime = '';
+
+            for(var i = 0, hoursLength = hours.length; i < hoursLength; i++) {
+                sanitizedTime = sanitizeTime(hours[i].textContent);
+                if (sanitizedTime.includes(time)) {
+                    mouse.click(hours[i], {dropdown: true});
+                    return 'Hour selected: ' + sanitizedTime;
+                }
+            }
+
+            return 'Hour not found: ' + time;
+    };
+
+    return {
+        selectStartTime: function(time) {
+            return selectTimeOnElement(time, startTimeElement());
+        },
+        selectEndTime: function(time) {
+            return selectTimeOnElement(time, endTimeElement());
+        },
+        selectRoomsTab: function() {
+            var tab = roomsTabElement();
+            if (!tab.classList.contains('ui-ltsr-selected')) {
+                tab.click();
+                return 'Rooms tab selected';
+            } else {
+                return 'Rooms tab already selected';
+            }
         }
-    }
+    };
 
-    return 'Hour not found: ' + time;
-}
-
-function clickOnRooms() {
-    var rooms = document.querySelector('#ui-ltsr-tab-1');
-    rooms.click();
-}
+})(MOUSE);
 
 function clickOnCountry(country) {
     var elements = document.querySelectorAll('div.ch');
@@ -103,12 +140,8 @@ function findRoomInOffice(query) {
     }, 800);
 }
 
-var startTime = document.querySelector('input[id*="st"][class*="dr-time"]');
-var endTime = document.querySelector('input[id*="et"][class*="dr-time"]');
-HIGHLIGHT.glow(startTime);
-HIGHLIGHT.glow(endTime);
-console.log(selectTime('16:30', startTime));
-console.log(selectTime('17:30', endTime));
-clickOnRooms();
+console.log(CALENDAR.selectStartTime('16:30'));
+console.log(CALENDAR.selectEndTime('17:30'));
+console.log(CALENDAR.selectRoomsTab());
 console.log(clickOnCountry('Brazil'));
 findRoomInOffice('POA');
