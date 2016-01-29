@@ -19,9 +19,9 @@ var HIGHLIGHT = (function(){
 })();
 
 var MOUSE = (function() {
-    var options = { bubbles: true, cancelable: true, view: window };
-    var mouseUpEvent = new MouseEvent('mousedown',  options);
-    var mouseDownEvent = new MouseEvent('mouseup', options);
+    var eventOptions = { bubbles: true, cancelable: true, view: window };
+    var mouseUpEvent = new MouseEvent('mousedown', eventOptions);
+    var mouseDownEvent = new MouseEvent('mouseup', eventOptions);
 
     return {
         click: function(element, options) {
