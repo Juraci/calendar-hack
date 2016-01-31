@@ -53,6 +53,10 @@ var CALENDAR = (function(mouse) {
         return document.querySelector(roomsTabSelector);
     };
 
+    var roomsTabSelected = function() {
+        return roomsTabElement().classList.contains('ui-ltsr-selected') ? true : false;
+    };
+
     var hourElements = function() {
         return document.querySelectorAll(hoursSelector);
     };
@@ -86,8 +90,8 @@ var CALENDAR = (function(mouse) {
         },
         selectRoomsTab: function() {
             var tab = roomsTabElement();
-            if (!tab.classList.contains('ui-ltsr-selected')) {
-                tab.click();
+            if (! roomsTabSelected()) {
+                roomsTabElement().click();
                 return 'Rooms tab selected';
             } else {
                 return 'Rooms tab already selected';
