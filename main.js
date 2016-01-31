@@ -40,6 +40,8 @@ var CALENDAR = (function(mouse) {
     var endTimeSelector = 'input[id*="et"][class*="dr-time"]';
     var roomsTabSelector = '#ui-ltsr-tab-1';
     var hoursSelector = 'div.goog-control';
+    var countriesSelector = 'div.ch';
+    var zippySelector = 'div[class*="ch-zippy-exp"]';
 
     var startTimeElement = function() {
         return document.querySelector(startTimeSelector);
@@ -63,6 +65,14 @@ var CALENDAR = (function(mouse) {
 
     var sanitizeTime = function(str) {
         return str.replace(/ \([\d+]*\,*[\d+]* [a-z]+\)/, '');
+    };
+
+    var getCountriesList = function() {
+        return document.querySelectorAll(countriesSelector);
+    };
+
+    var countryExpanded = function(countryElement) {
+        return countryElement.parentElement.querySelector(zippySelector) === null;
     };
 
     var selectTimeOnElement = function(time, element) {
@@ -89,34 +99,31 @@ var CALENDAR = (function(mouse) {
             return selectTimeOnElement(time, endTimeElement());
         },
         selectRoomsTab: function() {
-            var tab = roomsTabElement();
             if (! roomsTabSelected()) {
                 roomsTabElement().click();
                 return 'Rooms tab selected';
             } else {
                 return 'Rooms tab already selected';
             }
+        },
+        expandCountry: function(country) {
+            var elements = getCountriesList();
+
+            for(var i =  0, elementsLength = elements.length; i < elementsLength; i++) {
+                if (elements[i].textContent.includes(country)) {
+                    if (countryExpanded(elements[i])) {
+                        elements[i].click();
+                        return 'Country found: ' + country;
+                    } else {
+                        return 'Country already expanded: ' + country;
+                    }
+                }
+            }
+            return 'Country ' + country + ' not found';
         }
     };
 
 })(MOUSE);
-
-function clickOnCountry(country) {
-    var elements = document.querySelectorAll('div.ch');
-
-    for(var i =  0, elementsLength = elements.length; i < elementsLength; i++) {
-        if (elements[i].textContent.includes(country)) {
-            if (elements[i].parentElement.querySelector('div[class*="ch-zippy-exp"]') === null ) {
-                elements[i].click();
-                return 'Country found: ' + country;
-            } else {
-                return 'Country already expanded: ' + country;
-            }
-        }
-
-    }
-    return 'Country ' + country + ' not found';
-}
 
 function findRoomInOffice(query) {
     var tries = 0;
@@ -147,5 +154,5 @@ function findRoomInOffice(query) {
 console.log(CALENDAR.selectStartTime('16:30'));
 console.log(CALENDAR.selectEndTime('17:30'));
 console.log(CALENDAR.selectRoomsTab());
-console.log(clickOnCountry('Brazil'));
+console.log(CALENDAR.expandCountry('Brazil'));
 findRoomInOffice('POA');
