@@ -1,0 +1,22 @@
+{
+  "name": "calendar-hack",
+  "version": "1.0.0",
+  "description": "",
+  "main": "main.js",
+  "scripts": {
+    "test": "jasmine"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Juraci/calendar-hack.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Juraci/calendar-hack/issues"
+  },
+  "homepage": "https://github.com/Juraci/calendar-hack#readme",
+  "devDependencies": {
+    "jasmine": "^2.4.1"
+  }
+}
