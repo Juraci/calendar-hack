@@ -42,6 +42,8 @@ var CALENDAR = (function(mouse) {
     var hoursSelector = 'div.goog-control';
     var countriesSelector = 'div.ch';
     var zippySelector = 'div[class*="ch-zippy-exp"]';
+    var officeSelector = 'div.ci[style*="background-image"][style*="res_a.gif"]';
+    var addOfficeSelector = '.conf-action';
 
     var startTimeElement = function() {
         return document.querySelector(startTimeSelector);
@@ -120,6 +122,12 @@ var CALENDAR = (function(mouse) {
                 }
             }
             return 'Country ' + country + ' not found';
+        },
+        getAvailableOffices: function() {
+            return document.querySelectorAll(officeSelector);
+        },
+        addOffice: function(office) {
+                office.querySelector(addOfficeSelector).click();
         }
     };
 
@@ -131,13 +139,13 @@ function findRoomInOffice(query) {
 
     var id = setInterval(function(){
         console.log('looking for offices');
-        var offices = document.querySelectorAll('div.ci[style*="background-image"][style*="res_a.gif"]');
+        var offices = CALENDAR.getAvailableOffices();
 
         for(var i = 0, officesLength = offices.length; i < officesLength; i++) {
             console.log('Checking office: ' + offices[i].textContent);
             if(offices[i].textContent.includes(query)) {
                 console.log('Room found ' + query);
-                offices[i].querySelector('.conf-action').click();
+                CALENDAR.addOffice(offices[i]);
                 clearInterval(id);
                 break;
             }
