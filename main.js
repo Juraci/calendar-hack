@@ -137,7 +137,17 @@ var CALENDAR = (function(mouse) {
 
 })(MOUSE);
 
-function findRoomInOffice(query) {
+function findRoomInOffice(settings) {
+
+    settings.startTime = 'startTime' in settings ? settings.startTime : closestTimeFrame();
+    settings.duration = 'duration' in settings ? settings.duration : '1';
+    settings['endTime'] = getEndTime(settings.startTime, settings.duration);
+
+    console.log(CALENDAR.selectStartTime(settings.startTime));
+    console.log(CALENDAR.selectEndTime(settings.endTime));
+    console.log(CALENDAR.selectRoomsTab());
+    console.log(CALENDAR.expandCountry(settings.country));
+
     var tries = 0;
     var maxTries = 10;
 
@@ -147,8 +157,8 @@ function findRoomInOffice(query) {
 
         for(var i = 0, officesLength = offices.length; i < officesLength; i++) {
             console.log('Checking office: ' + offices[i].textContent);
-            if(offices[i].textContent.includes(query)) {
-                console.log('Room found ' + query);
+            if(offices[i].textContent.includes(settings.officeQuery)) {
+                console.log('Room found ' + settings.officeQuery);
                 CALENDAR.addOffice(offices[i]);
                 HIGHLIGHT.glow(CALENDAR.getLocationField());
                 clearInterval(id);
@@ -158,14 +168,62 @@ function findRoomInOffice(query) {
 
         tries++;
         if (tries >= maxTries) {
-            console.log('Could not find a room in the office in %s tries, aborting.', tries);
+            console.log('Could not find a room in the office in %s tries, moving on 30 minutes...', tries);
             clearInterval(id);
+            settings.startTime = nextTimeFrameRelative(settings.startTime);
+            findRoomInOffice(settings);
         }
     }, 800);
 }
 
-console.log(CALENDAR.selectStartTime('16:30'));
-console.log(CALENDAR.selectEndTime('17:30'));
-console.log(CALENDAR.selectRoomsTab());
-console.log(CALENDAR.expandCountry('Brazil'));
-findRoomInOffice('POA');
+function roundToTimeFrame(time) {
+
+    var hours = parseInt(time.split(':')[0]);
+    var minutes = parseInt(time.split(':')[1]);
+
+    if(minutes < 30) {
+        minutes = 30;
+    } else {
+        hours++;
+        minutes = '00';
+    }
+
+    return hours + ':' + minutes;
+}
+
+function closestTimeFrame() {
+    var now = new Date;
+    return roundToTimeFrame(now.getHours() + ':' + now.getMinutes());
+}
+
+function getEndTime(startTime, duration) {
+    var hours = parseInt(startTime.split(':')[0]);
+    var minutes = parseInt(startTime.split(':')[1]);
+    var endHour = hours + parseInt(duration);
+    return endHour + ':' + minutes;
+}
+
+function nextTimeFrameRelative(time) {
+    var hours = parseInt(time.split(':')[0]);
+    var minutes = parseInt(time.split(':')[1]);
+    var increment = 30;
+
+    if(minutes < 30) {
+        minutes += 30;
+    } else {
+        hours++;
+        minutes = '00';
+    }
+
+    return hours + ':' + minutes;
+}
+
+var settings = {
+    country: 'Brazil',
+    startTime: '15:00',
+    duration: '1',
+    officeQuery: 'POA'
+};
+
+
+findRoomInOffice(settings);
