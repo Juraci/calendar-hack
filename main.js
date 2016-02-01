@@ -44,6 +44,7 @@ var CALENDAR = (function(mouse) {
     var zippySelector = 'div[class*="ch-zippy-exp"]';
     var officeSelector = 'div.ci[style*="background-image"][style*="res_a.gif"]';
     var addOfficeSelector = '.conf-action';
+    var locationFieldSelector = 'input.textinput[aria-labelledby*="location-label"]';
 
     var startTimeElement = function() {
         return document.querySelector(startTimeSelector);
@@ -127,7 +128,10 @@ var CALENDAR = (function(mouse) {
             return document.querySelectorAll(officeSelector);
         },
         addOffice: function(office) {
-                office.querySelector(addOfficeSelector).click();
+            office.querySelector(addOfficeSelector).click();
+        },
+        getLocationField: function() {
+            return document.querySelector(locationFieldSelector);
         }
     };
 
@@ -146,6 +150,7 @@ function findRoomInOffice(query) {
             if(offices[i].textContent.includes(query)) {
                 console.log('Room found ' + query);
                 CALENDAR.addOffice(offices[i]);
+                HIGHLIGHT.glow(CALENDAR.getLocationField());
                 clearInterval(id);
                 break;
             }
