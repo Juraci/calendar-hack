@@ -46,4 +46,16 @@ describe('TimeMachine', function() {
             expect(time.getHours()).toEqual(0);
         });
     });
+
+    describe('#getMinutes', function() {
+        it('returns 30 when time is 17:30', function() {
+            var time = new TimeMachine('17:30');
+            expect(time.getMinutes()).toEqual(30);
+        });
+
+        it('returns 0 when time is 6:00pm', function() {
+            var time = new TimeMachine('6:00pm');
+            expect(time.getMinutes()).toEqual(0);
+        });
+    });
 });
