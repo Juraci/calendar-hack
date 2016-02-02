@@ -57,5 +57,10 @@ describe('TimeMachine', function() {
             var time = new TimeMachine('6:00pm');
             expect(time.getMinutes()).toEqual(0);
         });
+
+        it('returns 30 when time is 10:30am', function() {
+            var time = new TimeMachine('10:30pm');
+            expect(time.getMinutes()).toEqual(30);
+        });
     });
 });
