@@ -29,4 +29,21 @@ describe('TimeMachine', function() {
             expect(time.twelveHoursFormat()).toBe(false);
         });
     });
+
+    describe('#getHours', function() {
+        it('returns 17 when time is 17:00', function() {
+            var time = new TimeMachine('17:00');
+            expect(time.getHours()).toEqual(17);
+        });
+
+        it('returns 6 when time is 6:00', function() {
+            var time = new TimeMachine('6:00');
+            expect(time.getHours()).toEqual(6);
+        });
+
+        it('returns 0 when time is 00:00', function() {
+            var time = new TimeMachine('00:00');
+            expect(time.getHours()).toEqual(0);
+        });
+    });
 });
