@@ -1,6 +1,15 @@
 describe('TimeMachine', function() {
     var TimeMachine = require('../lib/TimeMachine.js');
 
+    describe('constructor', function() {
+        it('throws an error when the format is not recognized', function() {
+            var error = new Error('time format 123143 not recognized');
+            expect(function () {
+                var time = new TimeMachine('123143');
+            }).toThrow(error);
+        });
+    });
+
     describe('#twentyFourHoursFormat', function() {
         it('returns true to 17:00', function() {
             var time = new TimeMachine('17:00');
@@ -36,8 +45,8 @@ describe('TimeMachine', function() {
             expect(time.getHours()).toEqual(17);
         });
 
-        it('returns 6 when time is 6:00', function() {
-            var time = new TimeMachine('6:00');
+        it('returns 6 when time is 6:00pm', function() {
+            var time = new TimeMachine('6:00pm');
             expect(time.getHours()).toEqual(6);
         });
 
