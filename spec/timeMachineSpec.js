@@ -126,6 +126,54 @@ describe('TimeMachine', function() {
         });
     });
 
+    describe('#nextTimeFrame', function() {
+        describe('when the format is twenty four hours', function() {
+            it('sets the final time to 13:30 when the time is 13:00', function() {
+                var time = new TimeMachine('13:00');
+                time.nextTimeFrame();
+                expect(time.time).toEqual('13:30');
+            });
+
+            it('sets the final time to 14:00 when the time is 13:30', function() {
+                var time = new TimeMachine('13:30');
+                time.nextTimeFrame();
+                expect(time.time).toEqual('14:00');
+            });
+        });
+
+        describe('when the format is twelve hours', function() {
+            it('sets the final time to 1:00pm when the time is 12:30pm', function() {
+                var time = new TimeMachine('12:30pm');
+                time.nextTimeFrame();
+                expect(time.time).toEqual('1:00pm');
+            });
+
+            it('sets the final time to 12:00pm when the time is 11:30am', function() {
+                var time = new TimeMachine('11:30am');
+                time.nextTimeFrame();
+                expect(time.time).toEqual('12:00pm');
+            });
+
+            it('sets the final time to 12:00am when the time is 11:30pm', function() {
+                var time = new TimeMachine('11:30pm');
+                time.nextTimeFrame();
+                expect(time.time).toEqual('12:00am');
+            });
+
+            it('sets the final time to 3:00pm when the time is 2:30pm', function() {
+                var time = new TimeMachine('2:30pm');
+                time.nextTimeFrame();
+                expect(time.time).toEqual('3:00pm');
+            });
+
+            it('sets the final time to 10:30am when the time is 10:00am', function() {
+                var time = new TimeMachine('10:00am');
+                time.nextTimeFrame();
+                expect(time.time).toEqual('10:30am');
+            });
+        });
+    });
+
     describe('#addDuration', function() {
         it('sets the final time to 18:30 when the time is 17:30 and the duration is 1h', function() {
             var time = new TimeMachine('17:30');
