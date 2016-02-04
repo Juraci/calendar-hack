@@ -99,7 +99,7 @@ TimeMachine.prototype.roundToTimeFrame = function() {
     if(minutes < 30) {
         minutes = 30;
     } else {
-        hours++;
+        hours = hours === 23 ? '00' : hours + 1;
         minutes = '00';
     }
 
