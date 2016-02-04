@@ -9,6 +9,13 @@ describe('TimeMachine', function() {
             }).toThrow(error);
         });
 
+        it('throws an error when the argument is 04:00pm', function() {
+            var error = new Error('time format 04:00pm not recognized');
+            expect(function () {
+                var time = new TimeMachine('04:00pm');
+            }).toThrow(error);
+        });
+
         it('should not throw any errors with 6:00 as argument', function() {
             var error = new Error('time format 6:00 not recognized');
             expect(function () {
