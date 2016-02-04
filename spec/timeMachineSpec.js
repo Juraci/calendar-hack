@@ -199,4 +199,46 @@ describe('TimeMachine', function() {
             expect(time.time).toEqual('16:00');
         });
     });
+
+    describe('#roundToTimeFrame', function() {
+        it('returns 11:30 when the time is 11:29', function() {
+            var time = new TimeMachine('11:29');
+            time.roundToTimeFrame();
+            expect(time.time).toEqual('11:30');
+        });
+
+        it('returns 12:00 when the time is 11:30', function() {
+            var time = new TimeMachine('11:30');
+            time.roundToTimeFrame();
+            expect(time.time).toEqual('12:00');
+        });
+
+        it('throws an error when the time format is not twenty four hours', function() {
+            var time = new TimeMachine('1:00pm');
+            var error = new Error('cannot round to time frame with this format');
+            expect(function() {
+                time.roundToTimeFrame();
+            }).toThrow(error);
+        });
+    });
+
+    describe('#toTwelveHoursFormat', function() {
+        it('returns 10:00am when the time is 10:00', function() {
+            var time = new TimeMachine('10:00');
+            time.toTwelveHoursFormat();
+            expect(time.time).toEqual('10:00am');
+        });
+
+        it('returns 11:00pm when the time is 23:00', function() {
+            var time = new TimeMachine('23:00');
+            time.toTwelveHoursFormat();
+            expect(time.time).toEqual('11:00pm');
+        });
+
+        it('stays the same value when the time is already at twelve hours format', function() {
+            var time = new TimeMachine('10:00am');
+            time.toTwelveHoursFormat();
+            expect(time.time).toEqual('10:00am');
+        });
+    });
 });

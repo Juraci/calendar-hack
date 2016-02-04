@@ -1,3 +1,128 @@
+var TimeMachine = function(time) {
+    this.time = time;
+    if(!this.twentyFourHoursFormat() && !this.twelveHoursFormat()) {
+        throw(new Error('time format ' + time + ' not recognized'));
+    }
+};
+
+TimeMachine.prototype.twentyFourHoursFormat =  function() {
+    return this.time.match(/[0-9][0-9]\:[0-9][0-9]$/) !== null;
+};
+
+TimeMachine.prototype.twelveHoursFormat = function() {
+    return this.time.match(/\d+\:[0-9][0-9](?:am|pm)$/) !== null;
+};
+
+TimeMachine.prototype.getExtension = function() {
+    if(this.twentyFourHoursFormat()) { return false; }
+    return this.time.match(/am|pm/)[0];
+};
+
+TimeMachine.prototype.getHours = function() {
+    return parseInt(this.time.match(/\d+/)[0]);
+};
+
+TimeMachine.prototype.getMinutes = function() {
+    return parseInt(this.time.match(/\:(\d+)/)[1]);
+};
+
+TimeMachine.prototype.incrementByOneHour = function() {
+    var minutes = this.getMinutes() === 0 ? '00' : this.getMinutes();
+    var hours = this.getHours();
+
+    if(this.twentyFourHoursFormat()) {
+        hours++;
+        this.time = hours + ':' + minutes;
+    } else if(this.twelveHoursFormat()) {
+        var extension = this.getExtension();
+
+        if(hours === 12) {
+            hours = 1;
+        } else if(hours === 11) {
+            hours++;
+            extension = extension === 'pm' ? 'am' : 'pm';
+        } else {
+            hours++;
+        }
+        this.time = hours + ':' + minutes + extension;
+    }
+};
+
+TimeMachine.prototype.nextTimeFrame = function() {
+    var minutes = this.getMinutes();
+    var hours = this.getHours();
+
+    if(this.twentyFourHoursFormat()) {
+        if(minutes < 30) {
+            minutes += 30;
+        } else {
+            minutes = '00';
+            hours++;
+        }
+        this.time = hours + ':' + minutes;
+    } else {
+        var extension = this.getExtension();
+        if(minutes < 30) {
+            minutes += 30;
+            this.time = hours + ':' + minutes + extension;
+        } else {
+            minutes = '00';
+            if(hours === 12) {
+                hours = 1;
+            } else if(hours === 11) {
+                hours++;
+                extension = extension === 'pm' ? 'am' : 'pm';
+            } else {
+                hours++;
+            }
+            this.time = hours + ':' + minutes + extension;
+        }
+    }
+};
+
+TimeMachine.prototype.addDuration = function(duration) {
+    duration = parseInt(duration);
+
+    for(var i = 0; i < duration; i++) {
+        this.incrementByOneHour();
+    }
+};
+
+TimeMachine.prototype.roundToTimeFrame = function() {
+    var hours = this.getHours();
+    var minutes = this.getMinutes();
+
+    if(!this.twentyFourHoursFormat()) {
+        throw new Error('cannot round to time frame with this format');
+    }
+
+    if(minutes < 30) {
+        minutes = 30;
+    } else {
+        hours++;
+        minutes = '00';
+    }
+
+    this.time = hours + ':' + minutes;
+};
+
+TimeMachine.prototype.toTwelveHoursFormat = function() {
+    if(this.twelveHoursFormat()) { return this.time; }
+
+    var hours;
+    var minutes = this.getMinutes() === 0 ? '00' : this.getMinutes();
+    var extension = this.getHours() < 12 ? 'am' : 'pm';
+    var hoursMap = { 13:1, 14:2, 15:3, 16:4, 17:5, 18:6, 19:7, 20:8, 21:9, 22:10, 23:11, 00:12 };
+
+    if(this.getHours() <= 12) {
+        hours = this.getHours();
+    } else {
+        hours = hoursMap[this.getHours()];
+    }
+
+    this.time = hours + ':' + minutes + extension;
+};
+
 var HIGHLIGHT = (function(){
     var boxShadow = "0 0 15px rgba(81, 250, 200, 1)";
     var border = "1px solid rgba(81, 250, 200, 1)";
@@ -83,9 +208,10 @@ var CALENDAR = (function(mouse) {
             var hours = hourElements();
             var sanitizedTime = '';
 
-            for(var i = 0, hoursLength = hours.length; i < hoursLength; i++) {
+            for(var i = 0, hoursLength = hours.length, regex = ''; i < hoursLength; i++) {
                 sanitizedTime = sanitizeTime(hours[i].textContent);
-                if (sanitizedTime.includes(time)) {
+                regex = new RegExp('^'+ time + '$');
+                if (sanitizedTime.match(regex) !== null) {
                     mouse.click(hours[i], {dropdown: true});
                     return 'Hour selected: ' + sanitizedTime;
                 }
@@ -132,6 +258,10 @@ var CALENDAR = (function(mouse) {
         },
         getLocationField: function() {
             return document.querySelector(locationFieldSelector);
+        },
+        getSampleTime: function() {
+            mouse.click(startTimeElement());
+            return hourElements()[0].textContent;
         }
     };
 
@@ -141,7 +271,10 @@ function findRoomInOffice(settings) {
 
     settings.startTime = 'startTime' in settings ? settings.startTime : closestTimeFrame();
     settings.duration = 'duration' in settings ? settings.duration : '1';
-    settings['endTime'] = getEndTime(settings.startTime, settings.duration);
+    var startTime = new TimeMachine(settings.startTime);
+    var endTime = new TimeMachine(settings.startTime);
+    endTime.addDuration(settings.duration);
+    settings['endTime'] = endTime.time;
 
     console.log(CALENDAR.selectStartTime(settings.startTime));
     console.log(CALENDAR.selectEndTime(settings.endTime));
@@ -170,60 +303,37 @@ function findRoomInOffice(settings) {
         if (tries >= maxTries) {
             console.log('Could not find a room in the office in %s tries, moving on 30 minutes...', tries);
             clearInterval(id);
-            settings.startTime = nextTimeFrameRelative(settings.startTime);
+            startTime.nextTimeFrame();
+            settings.startTime = startTime.time;
             findRoomInOffice(settings);
         }
     }, 800);
 }
 
-function roundToTimeFrame(time) {
-
-    var hours = parseInt(time.split(':')[0]);
-    var minutes = parseInt(time.split(':')[1]);
-
-    if(minutes < 30) {
-        minutes = 30;
-    } else {
-        hours++;
-        minutes = '00';
-    }
-
-    return hours + ':' + minutes;
-}
 
 function closestTimeFrame() {
     var now = new Date;
-    return roundToTimeFrame(now.getHours() + ':' + now.getMinutes());
-}
+    var sample = CALENDAR.getSampleTime();
+    var time = new TimeMachine(sample);
+    var finalTime;
 
-function getEndTime(startTime, duration) {
-    var hours = parseInt(startTime.split(':')[0]);
-    var minutes = parseInt(startTime.split(':')[1]);
-    var endHour = hours + parseInt(duration);
-    return endHour + ':' + minutes;
-}
-
-function nextTimeFrameRelative(time) {
-    var hours = parseInt(time.split(':')[0]);
-    var minutes = parseInt(time.split(':')[1]);
-    var increment = 30;
-
-    if(minutes < 30) {
-        minutes += 30;
+    if(time.twentyFourHoursFormat()) {
+        finalTime = new TimeMachine(now.getHours() + ':' + now.getMinutes());
+        finalTime.roundToTimeFrame();
+        return finalTime.time;
     } else {
-        hours++;
-        minutes = '00';
+        finalTime = new TimeMachine(now.getHours() + ':' + now.getMinutes());
+        finalTime.roundToTimeFrame();
+        finalTime.toTwelveHoursFormat();
+        return finalTime.time;
     }
-
-    return hours + ':' + minutes;
 }
 
 var settings = {
     country: 'Brazil',
-    startTime: '15:00',
+    startTime: '3:00pm',
     duration: '1',
     officeQuery: 'POA'
 };
-
 
 findRoomInOffice(settings);
