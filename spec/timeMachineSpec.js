@@ -8,6 +8,13 @@ describe('TimeMachine', function() {
                 var time = new TimeMachine('123143');
             }).toThrow(error);
         });
+
+        it('should not throw any errors with 6:00 as argument', function() {
+            var error = new Error('time format 6:00 not recognized');
+            expect(function () {
+                var time = new TimeMachine('6:00');
+            }).not.toThrow(error);
+        });
     });
 
     describe('#twentyFourHoursFormat', function() {
