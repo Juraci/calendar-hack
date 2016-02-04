@@ -127,7 +127,7 @@ TimeMachine.prototype.toTwelveHoursFormat = function() {
         hours = hoursMap[this.getHours()];
     }
 
-    this.time = this.buildHours(hours) + ':' + minutes + extension;
+    this.time = hours + ':' + minutes + extension;
 };
 
 var HIGHLIGHT = (function(){
@@ -317,23 +317,31 @@ function findRoomInOffice(settings) {
     }, 800);
 }
 
+function getTimeNow() {
+    var now = new Date;
+    var hours = now.getHours();
+    var minutes = now.getMinutes();
+
+    if(minutes <= 9 && minutes >= 1) {
+         minutes = '0' + minutes;
+    }
+    return hours + ':' + minutes;
+}
 
 function closestTimeFrame() {
-    var now = new Date;
+    var timeNow = getTimeNow();
+    console.log(timeNow);
     var sample = CALENDAR.getSampleTime();
     var time = new TimeMachine(sample);
     var finalTime;
 
-    if(time.twentyFourHoursFormat()) {
-        finalTime = new TimeMachine(now.getHours() + ':' + now.getMinutes());
-        finalTime.roundToTimeFrame();
-        return finalTime.time;
-    } else {
-        finalTime = new TimeMachine(now.getHours() + ':' + now.getMinutes());
-        finalTime.roundToTimeFrame();
+    finalTime = new TimeMachine(timeNow);
+    finalTime.roundToTimeFrame();
+
+    if(time.twelveHoursFormat()) {
         finalTime.toTwelveHoursFormat();
-        return finalTime.time;
     }
+    return finalTime.time;
 }
 
 var settings = {
