@@ -213,6 +213,12 @@ describe('TimeMachine', function() {
             expect(time.time).toEqual('12:00');
         });
 
+        it('returns 00:00 when the time is 23:30', function() {
+            var time = new TimeMachine('23:30');
+            time.roundToTimeFrame();
+            expect(time.time).toEqual('00:00');
+        });
+
         it('throws an error when the time format is not twenty four hours', function() {
             var time = new TimeMachine('1:00pm');
             var error = new Error('cannot round to time frame with this format');
