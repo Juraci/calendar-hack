@@ -330,7 +330,6 @@ function getTimeNow() {
 
 function closestTimeFrame() {
     var timeNow = getTimeNow();
-    console.log(timeNow);
     var sample = CALENDAR.getSampleTime();
     var time = new TimeMachine(sample);
     var finalTime;
@@ -344,10 +343,16 @@ function closestTimeFrame() {
     return finalTime.time;
 }
 
+var country = prompt('Which county are you? e.g. Brazil');
+var time = prompt('How many hours do you need? e.g. 1');
+var office = prompt('In which office are you? e.g. POA');
+var startTime = prompt('What time you wish to start looking for a room? e.g 10:00 or 10:00am');
+
 var settings = {
-    country: 'Brazil',
-    duration: '1',
-    officeQuery: 'POA'
+    country: country,
+    duration: time,
+    startTime: startTime,
+    officeQuery: office
 };
 
 findRoomInOffice(settings);
