@@ -331,7 +331,6 @@ function closestTimeFrame() {
 
 var settings = {
     country: 'Brazil',
-    startTime: '3:00pm',
     duration: '1',
     officeQuery: 'POA'
 };
