@@ -317,19 +317,20 @@ function findRoomInOffice(settings) {
     }, 800);
 }
 
-function getTimeNow() {
-    var now = new Date();
-    var hours = now.getHours();
-    var minutes = now.getMinutes();
+function getTimeNow(dateObject) {
+    var hours = dateObject.getHours();
+    var minutes = dateObject.getMinutes();
 
     if(minutes <= 9 && minutes >= 1) {
          minutes = '0' + minutes;
+    } else if(minutes === 0) {
+        minutes = '00';
     }
     return hours + ':' + minutes;
 }
 
 function closestTimeFrame() {
-    var timeNow = getTimeNow();
+    var timeNow = getTimeNow(new Date());
     var sample = CALENDAR.getSampleTime();
     var time = new TimeMachine(sample);
     var finalTime;
