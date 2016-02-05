@@ -344,6 +344,7 @@ function findRoomInOffice(settings) {
 
     var id = setInterval(function(){
         console.log('looking for offices');
+        SPINNERHANDLER.spin();
         var offices = CALENDAR.getAvailableOffices();
 
         for(var i = 0, officesLength = offices.length; i < officesLength; i++) {
@@ -353,6 +354,7 @@ function findRoomInOffice(settings) {
                 CALENDAR.addOffice(offices[i]);
                 HIGHLIGHT.glow(CALENDAR.getLocationField());
                 clearInterval(id);
+                SPINNERHANDLER.stop();
                 break;
             }
         }
