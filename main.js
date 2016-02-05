@@ -184,18 +184,26 @@ TimeMachine.prototype.toTwelveHoursFormat = function() {
 var HIGHLIGHT = (function(){
     var boxShadow = "0 0 15px rgba(81, 250, 200, 1)";
     var border = "1px solid rgba(81, 250, 200, 1)";
+    var glowCount = 0;
+    var glowLimit = 3;
 
     return {
         glow: function(element) {
             var originalBoxShadow = element.style.boxShadow;
             var originalBorder = element.style.border;
-            setInterval(function(){
+
+            var id = setInterval(function(){
+                glowCount++;
                 element.style.boxShadow = boxShadow;
                 element.style.border = border;
                 setTimeout(function() {
                     element.style.boxShadow = originalBoxShadow;
                     element.style.border = originalBorder;
                 }, 1000);
+
+                if(glowCount >= glowLimit) {
+                    clearInterval(id);
+                }
             }, 2000);
         }
     };
@@ -262,20 +270,20 @@ var CALENDAR = (function(mouse) {
     };
 
     var selectTimeOnElement = function(time, element) {
-            mouse.click(element);
-            var hours = hourElements();
-            var sanitizedTime = '';
+        mouse.click(element);
+        var hours = hourElements();
+        var sanitizedTime = '';
 
-            for(var i = 0, hoursLength = hours.length, regex = ''; i < hoursLength; i++) {
-                sanitizedTime = sanitizeTime(hours[i].textContent);
-                regex = new RegExp('^'+ time + '$');
-                if (sanitizedTime.match(regex) !== null) {
-                    mouse.click(hours[i], {dropdown: true});
-                    return 'Hour selected: ' + sanitizedTime;
-                }
+        for(var i = 0, hoursLength = hours.length, regex = ''; i < hoursLength; i++) {
+            sanitizedTime = sanitizeTime(hours[i].textContent);
+            regex = new RegExp('^'+ time + '$');
+            if (sanitizedTime.match(regex) !== null) {
+                mouse.click(hours[i], {dropdown: true});
+                return 'Hour selected: ' + sanitizedTime;
             }
+        }
 
-            return 'Hour not found: ' + time;
+        return 'Hour not found: ' + time;
     };
 
     return {
@@ -375,7 +383,7 @@ function getTimeNow(dateObject) {
     var minutes = dateObject.getMinutes();
 
     if(minutes <= 9 && minutes >= 1) {
-         minutes = '0' + minutes;
+        minutes = '0' + minutes;
     } else if(minutes === 0) {
         minutes = '00';
     }
