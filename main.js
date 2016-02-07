@@ -10,7 +10,7 @@ SPINNERHANDLER = (function(){
         lines: 13, // The number of lines to draw
         length: 28, // The length of each line
         width: 14, // The line thickness
-        radius: 42, // The radius of the inner circle
+        radius: 84, // The radius of the inner circle
         scale: 1, // Scales overall size of the spinner
         corners: 1, // Corner roundness (0..1)
         color: '#000', // #rgb or #rrggbb or array of colors
