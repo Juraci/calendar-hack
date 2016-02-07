@@ -1,6 +1,7 @@
 SPINNERHANDLER = (function(){
     var spinner;
     var target;
+    var running = false;
     var fakeSpinner = {
         spin: function(){},
         stop: function(){}
@@ -11,7 +12,7 @@ SPINNERHANDLER = (function(){
         length: 28, // The length of each line
         width: 14, // The line thickness
         radius: 84, // The radius of the inner circle
-        scale: 1, // Scales overall size of the spinner
+        scale: 1.50, // Scales overall size of the spinner
         corners: 1, // Corner roundness (0..1)
         color: '#000', // #rgb or #rrggbb or array of colors
         opacity: 0.25, // Opacity of the lines
@@ -33,14 +34,16 @@ SPINNERHANDLER = (function(){
         spinner = new Spinner(opts);
     } catch(e) {
         console.log(e);
-        console.log('Spin.js not present using fakeSpinner');
         spinner = fakeSpinner;
     }
 
     return {
         spin: function() {
-            target = document.querySelector('body');
-            spinner.spin(target);
+            if(!running) {
+                target = document.querySelector('body');
+                spinner.spin(target);
+                running = true;
+            }
         },
         stop: function() {
             spinner.stop();
