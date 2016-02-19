@@ -340,6 +340,7 @@ function findRoomInOffice(settings) {
 
     settings.startTime = 'startTime' in settings ? settings.startTime : closestTimeFrame();
     settings.duration = 'duration' in settings ? settings.duration : '1';
+    var unwantedMatch = settings.unwantedMatch;
     var startTime = new TimeMachine(settings.startTime);
     var endTime = new TimeMachine(settings.startTime);
     endTime.addDuration(settings.duration);
@@ -359,8 +360,9 @@ function findRoomInOffice(settings) {
         var offices = CALENDAR.getAvailableOffices();
 
         for(var i = 0, officesLength = offices.length; i < officesLength; i++) {
-            console.log('Checking office: ' + offices[i].textContent);
-            if(offices[i].textContent.includes(settings.officeQuery)) {
+            var textContent = offices[i].textContent;
+            console.log('Checking office: ' + textContent);
+            if(textContent.includes(settings.officeQuery) && doesNotMatch(unwantedMatch, textContent)) {
                 console.log('Room found ' + settings.officeQuery);
                 CALENDAR.addOffice(offices[i]);
                 HIGHLIGHT.glow(CALENDAR.getLocationField());
@@ -408,16 +410,23 @@ function closestTimeFrame() {
     return finalTime.time;
 }
 
+function doesNotMatch(unwantedStr, actualText){
+    if(unwantedStr === '' || unwantedStr === null) { return true; }
+    return !actualText.includes(unwantedStr);
+}
+
 var country = prompt('Which country are you? e.g. Brazil', 'Brazil');
 var time = prompt('How many hours do you need? e.g. 1', '1');
 var office = prompt('In which office are you? e.g. POA, BH, São Paulo', 'POA');
 var startTime = prompt('Time to start looking for a room. e.g 10:00 or 10:00am', closestTimeFrame());
+var unwantedStr = prompt('Type any unwanted matches like "Capacity 30" for instance', '');
 
 var settings = {
     country: country,
     duration: time,
     startTime: startTime,
-    officeQuery: office
+    officeQuery: office,
+    unwantedMatch: unwantedStr
 };
 
 findRoomInOffice(settings);
