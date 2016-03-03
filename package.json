@@ -4,7 +4,8 @@
   "description": "",
   "main": "main.js",
   "scripts": {
-    "test": "node jasmine-runner.js"
+    "test": "node jasmine-runner.js",
+    "build": "browserify app.js > main.js"
   },
   "repository": {
     "type": "git",
@@ -19,5 +20,9 @@
   "devDependencies": {
     "jasmine": "^2.4.1",
     "jasmine-spec-reporter": "^2.4.0"
+  },
+  "dependencies": {
+    "browserify": "^13.0.0",
+    "spin.js": "^2.3.2"
   }
 }
