@@ -237,7 +237,7 @@ module.exports = TimeMachine;
 },{}],3:[function(require,module,exports){
 var MOUSE = require('./mouse');
 
-var CALENDAR = (function(mouse) {
+var CALENDAR = (function(mouse, doc) {
     var startTimeSelector = 'input[id*="st"][class*="dr-time"]';
     var endTimeSelector = 'input[id*="et"][class*="dr-time"]';
     var roomsTabSelector = '#ui-ltsr-tab-1';
@@ -249,15 +249,15 @@ var CALENDAR = (function(mouse) {
     var locationFieldSelector = 'input.textinput[aria-labelledby*="location-label"]';
 
     var startTimeElement = function() {
-        return document.querySelector(startTimeSelector);
+        return doc.querySelector(startTimeSelector);
     };
 
     var endTimeElement = function() {
-        return document.querySelector(endTimeSelector);
+        return doc.querySelector(endTimeSelector);
     };
 
     var roomsTabElement = function() {
-        return document.querySelector(roomsTabSelector);
+        return doc.querySelector(roomsTabSelector);
     };
 
     var roomsTabSelected = function() {
@@ -265,7 +265,7 @@ var CALENDAR = (function(mouse) {
     };
 
     var hourElements = function() {
-        return document.querySelectorAll(hoursSelector);
+        return doc.querySelectorAll(hoursSelector);
     };
 
     var sanitizeTime = function(str) {
@@ -273,7 +273,7 @@ var CALENDAR = (function(mouse) {
     };
 
     var getCountriesList = function() {
-        return document.querySelectorAll(countriesSelector);
+        return doc.querySelectorAll(countriesSelector);
     };
 
     var countryExpanded = function(countryElement) {
@@ -328,13 +328,13 @@ var CALENDAR = (function(mouse) {
             return 'Country ' + country + ' not found';
         },
         getAvailableOffices: function() {
-            return document.querySelectorAll(officeSelector);
+            return doc.querySelectorAll(officeSelector);
         },
         addOffice: function(office) {
             office.querySelector(addOfficeSelector).click();
         },
         getLocationField: function() {
-            return document.querySelector(locationFieldSelector);
+            return doc.querySelector(locationFieldSelector);
         },
         getSampleTime: function() {
             mouse.click(startTimeElement());
@@ -342,7 +342,7 @@ var CALENDAR = (function(mouse) {
         }
     };
 
-})(MOUSE);
+})(MOUSE, document);
 
 module.exports = CALENDAR;
 
