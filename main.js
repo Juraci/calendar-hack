@@ -400,14 +400,10 @@ module.exports = MOUSE;
 },{}],6:[function(require,module,exports){
 var Spin = require('spin.js');
 
-SPINNERHANDLER = (function(Spinner){
+SPINNERHANDLER = (function(Spinner, doc){
     var spinner;
     var target;
     var running = false;
-    var fakeSpinner = {
-        spin: function(){},
-        stop: function(){}
-    };
 
     var opts = {
         lines: 13, // The number of lines to draw
@@ -436,13 +432,12 @@ SPINNERHANDLER = (function(Spinner){
         spinner = new Spinner(opts);
     } catch(e) {
         console.log(e);
-        spinner = fakeSpinner;
     }
 
     return {
         spin: function() {
             if(!running) {
-                target = document.querySelector('body');
+                target = doc.querySelector('body');
                 spinner.spin(target);
                 running = true;
             }
@@ -452,7 +447,7 @@ SPINNERHANDLER = (function(Spinner){
             running = false;
         }
     };
-})(Spin);
+})(Spin, document);
 
 module.exports = SPINNERHANDLER;
 
