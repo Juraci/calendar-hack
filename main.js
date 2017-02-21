@@ -5,7 +5,6 @@ var HIGHLIGHT = require('./lib/highlight');
 var CALENDAR = require('./lib/calendar');
 
 function findRoomInOffice(settings) {
-
     settings.startTime = 'startTime' in settings ? settings.startTime : closestTimeFrame();
     settings.duration = 'duration' in settings ? settings.duration : '1';
     var unwantedMatch = settings.unwantedMatch;
@@ -83,7 +82,7 @@ function doesNotMatch(unwantedStr, actualText){
     return !actualText.includes(unwantedStr);
 }
 
-var country = prompt('Which country are you? e.g. Brazil', 'Brazil');
+var country = prompt('Which country are you in? e.g. Brazil', 'Brazil');
 var time = prompt('How many hours do you need? e.g. 1', '1');
 var office = prompt('In which office are you? e.g. POA, BH, São Paulo', 'POA');
 var startTime = prompt('Time to start looking for a room. e.g 10:00 or 10:00am', closestTimeFrame());
@@ -242,10 +241,9 @@ var CALENDAR = (function(mouse, doc) {
     var endTimeSelector = 'input[id*="et"][class*="dr-time"]';
     var roomsTabSelector = '#ui-ltsr-tab-1';
     var hoursSelector = 'div.goog-control';
-    var countriesSelector = 'div.ch';
-    var zippySelector = 'div[class*="ch-zippy-exp"]';
-    var officeSelector = 'div.ci[style*="background-image"][style*="res_a.gif"]';
-    var addOfficeSelector = '.conf-action';
+    var countriesSelector = 'div.rp-node-header';
+    var zippySelector = 'div[aria-expanded="true"]';
+    var officeSelector = 'li.rp-room';
     var locationFieldSelector = 'input.textinput[aria-labelledby*="location-label"]';
 
     var startTimeElement = function() {
@@ -331,7 +329,7 @@ var CALENDAR = (function(mouse, doc) {
             return doc.querySelectorAll(officeSelector);
         },
         addOffice: function(office) {
-            office.querySelector(addOfficeSelector).click();
+            office.click();
         },
         getLocationField: function() {
             return doc.querySelector(locationFieldSelector);
