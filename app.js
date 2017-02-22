@@ -81,10 +81,19 @@ function doesNotMatch(unwantedStr, actualText){
     return !actualText.includes(unwantedStr);
 }
 
+if (!CALENDAR.isRightContext()) {
+  alert('You need to run this inside google calendar event creation page not here!');
+  return;
+}
+
 var country = prompt('Which country are you in? e.g. Brazil', 'Brazil');
+if(!country) { return; }
 var time = prompt('How many hours do you need? e.g. 1', '1');
+if(!time) { return; }
 var office = prompt('In which office are you? e.g. POA, BH, São Paulo', 'POA');
+if(!office) { return; }
 var startTime = prompt('Time to start looking for a room. e.g 10:00 or 10:00am', closestTimeFrame());
+if(!startTime) { return; }
 var unwantedStr = prompt('Type any unwanted matches like "Capacity 30" for instance', 'Capacity 30');
 
 var settings = {
