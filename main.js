@@ -2,9 +2,11 @@
 const SPINNERHANDLER = require('./lib/spinnerHandler');
 const TimeMachine = require('./lib/TimeMachine');
 const HIGHLIGHT = require('./lib/highlight');
+const BLUR = require('./lib/blur');
 const CALENDAR = require('./lib/calendar');
 
 function findRoomInOffice(settings) {
+  BLUR.add()
   SPINNERHANDLER.spin();
   settings.startTime = 'startTime' in settings ? settings.startTime : closestTimeFrame();
   settings.duration = 'duration' in settings ? settings.duration : '1';
@@ -41,6 +43,7 @@ function findRoomInOffice(settings) {
             HIGHLIGHT.glow(CALENDAR.getLocationField());
             clearInterval(id);
             SPINNERHANDLER.stop();
+            BLUR.remove();
             return 'done!';
           }
         }
@@ -115,7 +118,7 @@ const settings = {
 
 findRoomInOffice(settings);
 
-},{"./lib/TimeMachine":2,"./lib/calendar":3,"./lib/highlight":4,"./lib/spinnerHandler":6}],2:[function(require,module,exports){
+},{"./lib/TimeMachine":2,"./lib/blur":3,"./lib/calendar":4,"./lib/highlight":5,"./lib/spinnerHandler":7}],2:[function(require,module,exports){
 var TimeMachine = function(time) {
     this.time = time;
     if(!this.twentyFourHoursFormat() && !this.twelveHoursFormat()) {
@@ -251,6 +254,25 @@ TimeMachine.prototype.toTwelveHoursFormat = function() {
 module.exports = TimeMachine;
 
 },{}],3:[function(require,module,exports){
+const BLUR = (function(doc){
+  const blur = 'blur(3px)';
+  const noBlur = 'blur(0px)';
+
+  return {
+    add: () => {
+      let element = doc.querySelector('#calmaster');
+      element.style.filter = blur;
+    },
+    remove: () => {
+      let element = doc.querySelector('#calmaster');
+      element.style.filter = noBlur;
+    }
+  };
+})(document);
+
+module.exports = BLUR;
+
+},{}],4:[function(require,module,exports){
 const MOUSE = require('./mouse');
 
 const CALENDAR = (function(mouse, doc) {
@@ -434,7 +456,7 @@ const CALENDAR = (function(mouse, doc) {
 
 module.exports = CALENDAR;
 
-},{"./mouse":5}],4:[function(require,module,exports){
+},{"./mouse":6}],5:[function(require,module,exports){
 var HIGHLIGHT = (function(){
     var boxShadow = "0 0 15px rgba(81, 250, 200, 1)";
     var border = "1px solid rgba(81, 250, 200, 1)";
@@ -465,7 +487,7 @@ var HIGHLIGHT = (function(){
 
 module.exports = HIGHLIGHT;
 
-},{}],5:[function(require,module,exports){
+},{}],6:[function(require,module,exports){
 var MOUSE = (function() {
     var eventOptions = { bubbles: true, cancelable: true, view: window };
     var mouseUpEvent = new MouseEvent('mousedown', eventOptions);
@@ -485,7 +507,7 @@ var MOUSE = (function() {
 
 module.exports = MOUSE;
 
-},{}],6:[function(require,module,exports){
+},{}],7:[function(require,module,exports){
 var Spin = require('spin.js');
 
 SPINNERHANDLER = (function(Spinner, doc){
@@ -539,7 +561,7 @@ SPINNERHANDLER = (function(Spinner, doc){
 
 module.exports = SPINNERHANDLER;
 
-},{"spin.js":7}],7:[function(require,module,exports){
+},{"spin.js":8}],8:[function(require,module,exports){
 /**
  * Copyright (c) 2011-2014 Felix Gnass
  * Licensed under the MIT license

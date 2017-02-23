@@ -1,9 +1,11 @@
 const SPINNERHANDLER = require('./lib/spinnerHandler');
 const TimeMachine = require('./lib/TimeMachine');
 const HIGHLIGHT = require('./lib/highlight');
+const BLUR = require('./lib/blur');
 const CALENDAR = require('./lib/calendar');
 
 function findRoomInOffice(settings) {
+  BLUR.add()
   SPINNERHANDLER.spin();
   settings.startTime = 'startTime' in settings ? settings.startTime : closestTimeFrame();
   settings.duration = 'duration' in settings ? settings.duration : '1';
@@ -40,6 +42,7 @@ function findRoomInOffice(settings) {
             HIGHLIGHT.glow(CALENDAR.getLocationField());
             clearInterval(id);
             SPINNERHANDLER.stop();
+            BLUR.remove();
             return 'done!';
           }
         }
