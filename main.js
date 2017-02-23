@@ -5,81 +5,89 @@ var HIGHLIGHT = require('./lib/highlight');
 var CALENDAR = require('./lib/calendar');
 
 function findRoomInOffice(settings) {
-    settings.startTime = 'startTime' in settings ? settings.startTime : closestTimeFrame();
-    settings.duration = 'duration' in settings ? settings.duration : '1';
-    var unwantedMatch = settings.unwantedMatch;
-    var startTime = new TimeMachine(settings.startTime);
-    var endTime = new TimeMachine(settings.startTime);
-    endTime.addDuration(settings.duration);
-    settings['endTime'] = endTime.time;
+  SPINNERHANDLER.spin();
+  settings.startTime = 'startTime' in settings ? settings.startTime : closestTimeFrame();
+  settings.duration = 'duration' in settings ? settings.duration : '1';
+  var unwantedMatch = settings.unwantedMatch;
+  var startTime = new TimeMachine(settings.startTime);
+  var endTime = new TimeMachine(settings.startTime);
+  endTime.addDuration(settings.duration);
+  settings['endTime'] = endTime.time;
+  let selectedCountry = null;
 
-    console.log(CALENDAR.selectStartTime(settings.startTime));
-    console.log(CALENDAR.selectEndTime(settings.endTime));
-    console.log(CALENDAR.selectRoomsTab());
-    console.log(CALENDAR.expandCountry(settings.country));
+  CALENDAR.selectStartTime(settings.startTime)
+    .then(() => CALENDAR.selectEndTime(settings.endTime))
+    .then(() => CALENDAR.selectRoomsTab())
+    .then(() => CALENDAR.waitForCountries())
+    .then(() => CALENDAR.expandCountry(settings.country))
+    .then(() => CALENDAR.waitForOffices(settings.country, 10))
+    .then(() => {
+      console.log('>>>> done waiting for offices');
+      var tries = 0;
+      var maxTries = 1;
 
-    var tries = 0;
-    var maxTries = 10;
-
-    var id = setInterval(function(){
+      var id = setInterval(function(){
         console.log('looking for offices');
-        SPINNERHANDLER.spin();
-        var offices = CALENDAR.getAvailableOffices();
+
+        const element = CALENDAR.getExpandedNode(settings.country);
+        const offices = CALENDAR.getAvailableOffices(element);
 
         for(var i = 0, officesLength = offices.length; i < officesLength; i++) {
-            var textContent = offices[i].textContent;
-            console.log('Checking office: ' + textContent);
-            if(textContent.includes(settings.officeQuery) && doesNotMatch(unwantedMatch, textContent)) {
-                console.log('Room found ' + settings.officeQuery);
-                CALENDAR.addOffice(offices[i]);
-                HIGHLIGHT.glow(CALENDAR.getLocationField());
-                clearInterval(id);
-                SPINNERHANDLER.stop();
-                break;
-            }
+          var textContent = offices[i].textContent;
+          console.log('Checking office: ' + textContent);
+          if(textContent.includes(settings.officeQuery) && doesNotMatch(unwantedMatch, textContent)) {
+            console.log('Room found ' + settings.officeQuery);
+            CALENDAR.addOffice(offices[i]);
+            HIGHLIGHT.glow(CALENDAR.getLocationField());
+            clearInterval(id);
+            SPINNERHANDLER.stop();
+            return 'done!';
+          }
         }
 
         tries++;
         if (tries >= maxTries) {
-            console.log('Could not find a room in the office in %s tries, moving on 30 minutes...', tries);
-            clearInterval(id);
-            startTime.nextTimeFrame();
-            settings.startTime = startTime.time;
-            findRoomInOffice(settings);
+          console.log('Could not find a room in the office in %s tries, moving on 30 minutes...', tries);
+          clearInterval(id);
+          startTime.nextTimeFrame();
+          settings.startTime = startTime.time;
+          findRoomInOffice(settings);
         }
-    }, 800);
+      }, 800);
+    })
+    .catch(err => console.log(err));
 }
 
 function getTimeNow(dateObject) {
-    var hours = dateObject.getHours();
-    var minutes = dateObject.getMinutes();
+  var hours = dateObject.getHours();
+  var minutes = dateObject.getMinutes();
 
-    if(minutes <= 9 && minutes >= 1) {
-        minutes = '0' + minutes;
-    } else if(minutes === 0) {
-        minutes = '00';
-    }
-    return hours + ':' + minutes;
+  if(minutes <= 9 && minutes >= 1) {
+    minutes = '0' + minutes;
+  } else if(minutes === 0) {
+    minutes = '00';
+  }
+  return hours + ':' + minutes;
 }
 
 function closestTimeFrame() {
-    var timeNow = getTimeNow(new Date());
-    var sample = CALENDAR.getSampleTime();
-    var time = new TimeMachine(sample);
-    var finalTime;
+  var timeNow = getTimeNow(new Date());
+  var sample = CALENDAR.getSampleTime();
+  var time = new TimeMachine(sample);
+  var finalTime;
 
-    finalTime = new TimeMachine(timeNow);
-    finalTime.roundToTimeFrame();
+  finalTime = new TimeMachine(timeNow);
+  finalTime.roundToTimeFrame();
 
-    if(time.twelveHoursFormat()) {
-        finalTime.toTwelveHoursFormat();
-    }
-    return finalTime.time;
+  if(time.twelveHoursFormat()) {
+    finalTime.toTwelveHoursFormat();
+  }
+  return finalTime.time;
 }
 
 function doesNotMatch(unwantedStr, actualText){
-    if(unwantedStr === '' || unwantedStr === null) { return true; }
-    return !actualText.includes(unwantedStr);
+  if(unwantedStr === '' || unwantedStr === null) { return true; }
+  return !actualText.includes(unwantedStr);
 }
 
 if (!CALENDAR.isRightContext()) {
@@ -98,11 +106,11 @@ if(!startTime) { return; }
 var unwantedStr = prompt('Type any unwanted matches like "Capacity 30" for instance', 'Capacity 30');
 
 var settings = {
-    country: country,
-    duration: time,
-    startTime: startTime,
-    officeQuery: office,
-    unwantedMatch: unwantedStr
+  country: country,
+  duration: time,
+  startTime: startTime,
+  officeQuery: office,
+  unwantedMatch: unwantedStr
 };
 
 findRoomInOffice(settings);
@@ -246,101 +254,166 @@ module.exports = TimeMachine;
 var MOUSE = require('./mouse');
 
 var CALENDAR = (function(mouse, doc) {
-    var startTimeSelector = 'input[id*="st"][class*="dr-time"]';
-    var endTimeSelector = 'input[id*="et"][class*="dr-time"]';
-    var roomsTabSelector = '#ui-ltsr-tab-1';
-    var hoursSelector = 'div.goog-control';
-    var countriesSelector = 'div.rp-node-header';
-    var zippySelector = 'div[aria-expanded="true"]';
-    var officeSelector = 'li.rp-room';
-    var locationFieldSelector = 'input.textinput[aria-labelledby*="location-label"]';
+  var startTimeSelector = 'input[id*="st"][class*="dr-time"]';
+  var endTimeSelector = 'input[id*="et"][class*="dr-time"]';
+  var roomsTabSelector = '#ui-ltsr-tab-1';
+  var hoursSelector = 'div.goog-control';
+  var countriesSelector = 'div.rp-node-header';
+  var zippySelector = 'div[aria-expanded="true"]';
+  var officeSelector = 'li.rp-room';
+  var locationFieldSelector = 'input.textinput[aria-labelledby*="location-label"]';
 
-    var startTimeElement = function() {
-        return doc.querySelector(startTimeSelector);
-    };
+  var startTimeElement = function() {
+    return doc.querySelector(startTimeSelector);
+  };
 
-    var endTimeElement = function() {
-        return doc.querySelector(endTimeSelector);
-    };
+  var endTimeElement = function() {
+    return doc.querySelector(endTimeSelector);
+  };
 
-    var roomsTabElement = function() {
-        return doc.querySelector(roomsTabSelector);
-    };
+  var roomsTabElement = function() {
+    return doc.querySelector(roomsTabSelector);
+  };
 
-    var roomsTabSelected = function() {
-        return roomsTabElement().classList.contains('ui-ltsr-selected') ? true : false;
-    };
+  var roomsTabSelected = function() {
+    return roomsTabElement().classList.contains('ui-ltsr-selected') ? true : false;
+  };
 
-    var hourElements = function() {
-        return doc.querySelectorAll(hoursSelector);
-    };
+  var hourElements = function() {
+    return doc.querySelectorAll(hoursSelector);
+  };
 
-    var sanitizeTime = function(str) {
-        return str.replace(/ \([\d+]*\,*[\d+]* [a-z]+\)/, '');
-    };
+  var sanitizeTime = function(str) {
+    return str.replace(/ \([\d+]*\,*[\d+]* [a-z]+\)/, '');
+  };
 
-    var getCountriesList = function() {
-        return doc.querySelectorAll(countriesSelector);
-    };
+  var getCountriesList = function() {
+    return doc.querySelectorAll(countriesSelector);
+  };
 
-    var countryExpanded = function(countryElement) {
-        return countryElement.parentElement.querySelector(zippySelector) === null;
-    };
+  const getAvailableOffices = (countryElement) => {
+    return countryElement.querySelectorAll(officeSelector);
+  };
 
-    var selectTimeOnElement = function(time, element) {
-        mouse.click(element);
-        var hours = hourElements();
-        var sanitizedTime = '';
+  var countryExpanded = function(countryElement) {
+    return !!countryElement.parentElement.querySelector(zippySelector);
+  };
 
-        for(var i = 0, hoursLength = hours.length, regex = ''; i < hoursLength; i++) {
-            sanitizedTime = sanitizeTime(hours[i].textContent);
-            regex = new RegExp('^'+ time + '$');
-            if (sanitizedTime.match(regex) !== null) {
-                mouse.click(hours[i], {dropdown: true});
-                return 'Hour selected: ' + sanitizedTime;
-            }
-        }
+  const getExpandedNode = (text) => {
+    const nodeSelector = `.rp-node.expanded[data-node-id*="${text}"]`;
+    const element = doc.querySelector(nodeSelector);
+    if (!element) {
+      throw new Error(`Node ${text} not expanded, aborting..`);
+    }
+    return element;
+  };
 
-        return 'Hour not found: ' + time;
-    };
+  var selectTimeOnElement = function(time, element) {
+    mouse.click(element);
+    var hours = hourElements();
+    var sanitizedTime = '';
+
+    for(var i = 0, hoursLength = hours.length, regex = ''; i < hoursLength; i++) {
+      sanitizedTime = sanitizeTime(hours[i].textContent);
+      regex = new RegExp('^'+ time + '$');
+      if (sanitizedTime.match(regex) !== null) {
+        mouse.click(hours[i], {dropdown: true});
+        console.log(`Hour selected: ' + sanitizedTime`);
+        return;
+      }
+    }
+
+    throw new Error(`Hour not found: ${time}`);
+  };
 
   var isRightContext = function() {
     return !!startTimeElement();
   };
 
+  var delay = (time) => {
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        console.log('tick');
+        resolve();
+      }, time);
+    });
+  };
+
+  var waitForCountries = () => {
+    return new Promise((resolve) => {
+      delay(1000)
+        .then(() => {
+          let elements = getCountriesList();
+          if (elements.length === 0) {
+            return waitForCountries()
+              .then(() => {
+                resolve();
+              });
+          } else {
+            resolve();
+          }
+        });
+    });
+  };
+
+  var waitForOffices = (country, maxWaitingCicles) => {
+    const element = getExpandedNode(country);
+    return new Promise((resolve) => {
+      delay(1000)
+        .then(() => {
+          maxWaitingCicles--;
+          let elements = getAvailableOffices(element);
+          console.log('available offices: ', elements.length);
+          console.log('>> waiting cicles', maxWaitingCicles);
+          if (elements.length === 0 && (maxWaitingCicles > 0)) {
+            return waitForOffices(country, maxWaitingCicles)
+              .then(() => {
+                resolve();
+              });
+          } else {
+            resolve();
+          }
+        });
+    });
+  };
+
+  const expandCountry = function(country) {
+    const clickableCountrySelector = `.rp-node[data-node-id*="${country}"] .rp-node-header`;
+    const element = doc.querySelector(clickableCountrySelector);
+    if (element) {
+      console.log('Country found, expanding it: ' + country);
+      element.click();
+      if(countryExpanded(element)) {
+        console.log(`Country ${country} expanded`);
+        return delay(1000);
+      } else {
+        throw new Error(`Country not expanded ${country}`);
+      }
+    } else {
+      throw new Error(`Country not found ${country}`);
+    }
+  };
+
   return {
     selectStartTime: function(time) {
-      return selectTimeOnElement(time, startTimeElement());
+      selectTimeOnElement(time, startTimeElement());
+      return delay(1000);
     },
     selectEndTime: function(time) {
-      return selectTimeOnElement(time, endTimeElement());
+      selectTimeOnElement(time, endTimeElement());
+      return delay(1000);
     },
     selectRoomsTab: function() {
       if (! roomsTabSelected()) {
         roomsTabElement().click();
-        return 'Rooms tab selected';
+        console.log('Rooms tab selected');
       } else {
-        return 'Rooms tab already selected';
+        console.log('Rooms tab already selected');
       }
+      return delay(500);
     },
-    expandCountry: function(country) {
-      var elements = getCountriesList();
-
-      for(var i =  0, elementsLength = elements.length; i < elementsLength; i++) {
-        if (elements[i].textContent.includes(country)) {
-          if (countryExpanded(elements[i])) {
-            elements[i].click();
-            return 'Country found: ' + country;
-          } else {
-            return 'Country already expanded: ' + country;
-          }
-        }
-      }
-      return 'Country ' + country + ' not found';
-    },
-    getAvailableOffices: function() {
-      return doc.querySelectorAll(officeSelector);
-    },
+    expandCountry: expandCountry,
+    getAvailableOffices: getAvailableOffices,
     addOffice: function(office) {
       office.click();
     },
@@ -351,7 +424,10 @@ var CALENDAR = (function(mouse, doc) {
       mouse.click(startTimeElement());
       return hourElements()[0].textContent;
     },
-    isRightContext: isRightContext
+    isRightContext: isRightContext,
+    waitForCountries: waitForCountries,
+    waitForOffices: waitForOffices,
+    getExpandedNode: getExpandedNode
   };
 
 })(MOUSE, document);
